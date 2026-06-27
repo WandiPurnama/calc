@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>Brain Calc</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Inter, sans-serif;
+      }
+
+      body {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #08101d, #121d35);
+      }
+
+      .calc {
+        width: 430px;
+        padding: 24px;
+        border-radius: 38px;
+        background: linear-gradient(180deg, #141b2d, #101725);
+        box-shadow: 0 50px 100px rgba(0, 0, 0, 0.45);
+      }
+
+      .logo {
+        text-align: center;
+        font-size: 30px;
+        font-weight: 800;
+        margin-bottom: 18px;
+        background: linear-gradient(90deg, #ffffff, #6f83ff);
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+
+      .display {
+        height: 110px;
+        border-radius: 30px;
+        padding: 24px;
+        background: linear-gradient(180deg, #212b49, #1a223c);
+        color: white;
+        font-size: 54px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      .grid button {
+        height: 74px;
+        border: none;
+        border-radius: 24px;
+        font-size: 22px;
+        color: white;
+        cursor: pointer;
+        background: linear-gradient(180deg, #2b3558, #222d47);
+        transition: transform 0.2s ease;
+      }
+
+      .grid button:hover {
+        transform: translateY(-2px);
+      }
+
+      .op {
+        background: linear-gradient(135deg, #605eff, #4f45ff) !important;
+      }
+
+      .eq {
+        background: linear-gradient(135deg, #6481ff, #755dff) !important;
+      }
+
+      .clear {
+        background: linear-gradient(135deg, #ff4b72, #ff2e5c) !important;
+      }
+
+      /* POPUP SYSTEM */
+      .popup {
+        position: fixed;
+        inset: 0;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(4, 7, 13, 0.8);
+        backdrop-filter: blur(18px);
+        z-index: 100;
+      }
+
+      .box {
+        width: 380px;
+        padding: 32px;
+        border-radius: 34px;
+        background: linear-gradient(180deg, #141b2d, #101522);
+        color: white;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        text-align: center;
+      }
+
+      .premium {
+        width: max-content;
+        margin: 0 auto 20px auto;
+        padding: 10px 22px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #6481ff, #755dff);
+        font-weight: 700;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+      }
+
+      .title {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+      }
+
+      .sub {
+        color: #9aa6c8;
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 26px;
+      }
+
+      .plan {
+        text-align: left;
+        padding: 18px;
+        border-radius: 22px;
+        background: #1d263f;
+        margin-bottom: 12px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+      }
+
+      .active {
+        border-color: #6481ff;
+        background: #232d4b;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        align-items: center;
+        font-weight: 600;
+      }
+
+      .tag {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #6481ff;
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .save {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #00c76b, #00a65a);
+      }
+
+      .price {
+        font-size: 32px;
+        font-weight: 800;
+      }
+
+      .price small {
+        font-size: 16px;
+        font-weight: 400;
+        opacity: 0.6;
+      }
+
+      .buy {
+        width: 100%;
+        height: 58px;
+        margin-top: 12px;
+        border: none;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #6481ff, #755dff);
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      .buy:hover {
+        opacity: 0.9;
+      }
+
+      .skip {
+        width: 100%;
+        height: 54px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 20px;
+        background: #202943;
+        color: #9aa6c8;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .skip:hover {
+        background: #273252;
+        color: white;
+      }
+
+      /* KUSTOMISASI POPUP SUKSES */
+      .success-badge {
+        background: linear-gradient(135deg, #00e676, #00b0ff);
+        box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+      }
+
+      .success-icon {
+        font-size: 54px;
+        margin-bottom: 12px;
+        display: inline-block;
+        animation: pop 0.4s ease-out;
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, #00c76b, #00a65a);
+        box-shadow: 0 6px 20px rgba(0, 199, 107, 0.2);
+      }
+
+      @keyframes pop {
+        0% {
+          transform: scale(0.6);
+          opacity: 0;
+        }
+
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="calc">
+      <div class="logo">🧠 Brain Calc</div>
+      <div class="display" id="screen">0</div>
+      <div class="grid">
+        <button class="clear" onclick="clearAll()">C</button>
+        <button onclick="press('%')">%</button>
+        <button onclick="back()">⌫</button>
+        <button class="op" onclick="press('/')">÷</button>
+
+        <button onclick="press('7')">7</button>
+        <button onclick="press('8')">8</button>
+        <button onclick="press('9')">9</button>
+        <button class="op" onclick="press('*')">×</button>
+
+        <button onclick="press('4')">4</button>
+        <button onclick="press('5')">5</button>
+        <button onclick="press('6')">6</button>
+        <button class="op" onclick="press('-')">−</button>
+
+        <button onclick="press('1')">1</button>
+        <button onclick="press('2')">2</button>
+        <button onclick="press('3')">3</button>
+        <button class="op" onclick="press('+')">+</button>
+
+        <button onclick="press('0')">0</button>
+        <button onclick="press('.')">.</button>
+        <button onclick="back()">⌫</button>
+        <button class="eq" onclick="openPremium()">=</button>
+      </div>
+    </div>
+
+    <div class="popup" id="popup">
+      <div class="box">
+        <div class="premium">✨ Premium</div>
+        <div class="title">Upgrade</div>
+        <div class="sub">Dapatkan akses kalkulator penuh</div>
+
+        <div class="plan active" onclick="selectPlan(this, 'Bulanan')">
+          <div class="row">
+            <div>Bulanan</div>
+            <div class="tag">POPULER</div>
+          </div>
+          <div class="price">Rp25.000<small>/bulan</small></div>
+        </div>
+
+        <div class="plan" onclick="selectPlan(this, 'Tahunan')">
+          <div class="row">
+            <div>Tahunan</div>
+            <div class="save">HEMAT 15%</div>
+          </div>
+          <div class="price">Rp255.000<small>/tahun</small></div>
+        </div>
+
+        <button class="buy" id="buy" onclick="buyPremium()">
+          Beli Bulanan
+        </button>
+        <button class="skip" onclick="closePremium()">Nanti Saja</button>
+      </div>
+    </div>
+
+    <div class="popup" id="success-popup">
+      <div class="box">
+        <div class="success-icon">🎉</div>
+        <div class="title">Berhasil!</div>
+        <div class="sub">
+          Pembayaran kamu sukses dikonfirmasi. Nikmati akses penuh tanpa batas
+          di Brain Calc.
+        </div>
+        <button class="buy btn-success" onclick="closeSuccess()">
+          Mulai Menghitung
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let raw = "";
+      let isPremium = false;
+
+      const screen = document.getElementById("screen");
+
+      function format(v) {
+        return v.replace(/\d+/g, (n) => Number(n).toLocaleString("id-ID"));
+      }
+
+      function render() {
+        screen.innerHTML = raw ? format(raw) : 0;
+      }
+
+      function press(v) {
+        raw += v;
+        render();
+      }
+
+      function back() {
+        raw = raw.slice(0, -1);
+        render();
+      }
+
+      function clearAll() {
+        raw = "";
+        render();
+      }
+
+      function calculate() {
+        try {
+          if (raw) {
+            let result = eval(raw);
+            raw = String(result);
+            render();
+          }
+        } catch (e) {
+          screen.innerHTML = "Error";
+          raw = "";
+        }
+      }
+
+      function openPremium() {
+        if (isPremium) {
+          calculate();
+        } else {
+          document.getElementById("popup").style.display = "flex";
+        }
+      }
+
+      function closePremium() {
+        document.getElementById("popup").style.display = "none";
+      }
+
+      function selectPlan(el, paket) {
+        document
+          .querySelectorAll(".plan")
+          .forEach((a) => a.classList.remove("active"));
+        el.classList.add("active");
+        document.getElementById("buy").innerHTML =
+          paket === "Bulanan" ? "Beli Bulanan" : "Beli Tahunan";
+      }
+
+      function buyPremium() {
+        isPremium = true;
+        closePremium();
+        document.getElementById("success-popup").style.display = "flex";
+      }
+
+      function closeSuccess() {
+        document.getElementById("success-popup").style.display = "none";
+        calculate();
+      }
+
+      render();
+    </script>
+  </body>
+</html>
